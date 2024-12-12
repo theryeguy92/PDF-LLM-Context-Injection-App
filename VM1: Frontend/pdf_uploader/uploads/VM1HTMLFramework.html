@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Upload and Chatbot Interface</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #007bff;
+            color: #fff;
+            padding: 1rem 0;
+            text-align: center;
+        }
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        input[type="file"], input[type="text"], button {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: #fff;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .response-box {
+            margin-top: 2rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-left: 4px solid #007bff;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>PDF Upload and Chatbot Interface</h1>
+</header>
+
+<main>
+    <!-- PDF Upload Section -->
+    <section>
+        <h2>Upload a PDF</h2>
+        <form id="pdf-upload-form">
+            <div class="form-group">
+                <label for="pdf-file">Select PDF File</label>
+                <input type="file" id="pdf-file" name="pdf-file" accept="application/pdf" required>
+            </div>
+            <button type="submit">Upload PDF</button>
+        </form>
+        <div id="upload-status"></div>
+    </section>
+
+    <hr>
+
+    <!-- Chatbot Section -->
+    <section>
+        <h2>Ask Questions about Uploaded PDFs</h2>
+        <form id="chatbot-form">
+            <div class="form-group">
+                <label for="user-query">Your Question</label>
+                <input type="text" id="user-query" name="user-query" placeholder="Type your question..." required>
+            </div>
+            <button type="submit">Ask Question</button>
+        </form>
+        <div id="chatbot-response" class="response-box"></div>
+    </section>
+</main>
+
+<script>
+    // Handle PDF upload form submission
+    document.getElementById('pdf-upload-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const formData = new FormData();
+        const fileInput = document.getElementById('pdf-file');
+        formData.append('file', fileInput.files[0]);
+
+        try {
+            const response = await fetch('/upload_pdf/', {
+                method: 'POST',
+                body: formData
+            });
+            const result = await response.json();
+            document.getElementById('upload-status').textContent = result.status || 'Upload successful!';
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            document.getElementById('upload-status').textContent = 'Error uploading file!';
+        }
+    });
+
+    // Handle chatbot form submission
+    document.getElementById('chatbot-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const userQuery = document.getElementById('user-query').value;
+
+        try {
+            const response = await fetch('/chatbot/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: userQuery })
+            });
+            const result = await response.json();
+            document.getElementById('chatbot-response').textContent = result.answer || 'No response received!';
+        } catch (error) {
+            console.error('Error interacting with chatbot:', error);
+            document.getElementById('chatbot-response').textContent = 'Error interacting with chatbot!';
+        }
+    });
+</script>
+
+</body>
+</html>
