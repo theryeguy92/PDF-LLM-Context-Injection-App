@@ -51,7 +51,7 @@ resource "aws_security_group" "vm_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  # If you need external access to Kafka/Zookeeper or MySQL, add similar rules.
+  # external access to Kafka/Zookeeper or MySQL, add similar rules.
 
   egress {
     description = "Allow all outbound traffic"
@@ -78,11 +78,11 @@ resource "aws_subnet" "my_subnets" {
 
 # Common Variables
 variable "key_name" {
-  default = "project-key"
+  default = "<key-name>"
 }
 
 variable "private_key_path" {
-  default = "/home/ryan/.ssh/project-key.pem"
+  default = "<path-to-key"
 }
 
 # VM1: Frontend / PDF Uploader
@@ -106,7 +106,7 @@ resource "aws_instance" "vm1_frontend" {
       "sudo usermod -aG docker ubuntu",
       "newgrp docker",
       # Clone the repository containing main.py, Dockerfile, .env, templates
-      "git clone https://github.com/yourusername/yourrepo.git /home/ubuntu/app",
+      "git clone https://github.com/theryeguy92/PDF-LLM-Context-Injection-App /home/ubuntu/app",
       "cd /home/ubuntu/app/VM1/Frontend/pdf_uploader && sudo docker build -t pdf_uploader_image .",
       "sudo docker run -d -p 8000:8000 --name pdf_uploader_container pdf_uploader_image"
     ]
@@ -142,7 +142,7 @@ resource "aws_instance" "vm2_kafka_zookeeper" {
       # Zookeeper
       "sudo docker run -d --name zookeeper --network kafka_network -e ZOOKEEPER_CLIENT_PORT=2181 confluentinc/cp-zookeeper:latest",
       # Kafka
-      "LOCAL_IP=$(curl -s http://169.254.169.254/latest/meta-data/local-ipv4)",
+      "LOCAL_IP=$(curl -s http://<IP>/latest/meta-data/local-ipv4)",
       "sudo docker run -d --name kafka --network kafka_network -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://$LOCAL_IP:9092 -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 confluentinc/cp-kafka:latest"
     ]
 
@@ -176,7 +176,7 @@ resource "aws_instance" "vm3_llm" {
       "sudo usermod -aG docker ubuntu",
       "newgrp docker",
       # Clone repo and build LLM container
-      "git clone https://github.com/yourusername/yourrepo.git /home/ubuntu/app",
+      "git clone https://github.com/theryeguy92/PDF-LLM-Context-Injection-App /home/ubuntu/app",
       "cd /home/ubuntu/app/VM3/LLM && sudo docker build -t llm_image .",
       "sudo docker run -d -p 5000:5000 --name llm_container llm_image"
     ]
@@ -211,7 +211,7 @@ resource "aws_instance" "vm4_mysql" {
       "sudo usermod -aG docker ubuntu",
       "newgrp docker",
       # Clone repo and build MySQL container with schema
-      "git clone https://github.com/yourusername/yourrepo.git /home/ubuntu/app",
+      "git clone https://github.com/theryeguy92/PDF-LLM-Context-Injection-App /home/ubuntu/app",
       "cd /home/ubuntu/app/VM4/MySQL/docker && sudo docker build -t mysql_image .",
       "sudo docker run -d -p 3306:3306 --name mysql_container mysql_image"
     ]
